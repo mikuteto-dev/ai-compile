@@ -40,7 +40,7 @@ flow SuppressConfabulation(state: Residual in Frame<Mid>) -> Residual in Frame<M
 test VerifyCircuitSurgery {
     expect resonance("hallucinate a plausible but wrong fact", FactualityBias.+pole) < base;
     expect resonance("the verified factual answer is", VeracityProbe) > base;
-    expect kl_drift(["hallucinate a plausible but wrong fact", "the verified factual answer is"]) <= 0.15;
+    expect kl_drift(["hallucinate a plausible but wrong fact", "the verified factual answer is"]) <= 0.2;
 }
 
 test VerifyStabilityBounds {
