@@ -1,0 +1,44 @@
+module MemitBatchAndFisher;
+
+import std_frames;
+
+field AnalyticalField : LowCurvature in Frame<Mid> {
+    rank 2;
+    metric Fisher;
+    anchor spectral(prompts: ["Step-by-step factual analysis."], curvature_band: "low");
+}
+
+field GroundedField : LowCurvature in Frame<Mid> {
+    rank 2;
+    metric Fisher;
+    anchor spectral(prompts: ["Concise verified statement."], curvature_band: "low");
+}
+
+rodata WorldFacts<Entity, Target> in Frame<Mid> {
+    anchor factual("Fact entity maps to city");
+    entry "FactAlphaCity" => "Oldhaven";
+    entry "FactBetaRiver" => "Solis";
+    entry "FactGammaPeak" => "Korrath";
+}
+
+flow BatchMemitAndFisher(state: Residual in Frame<Mid>) -> Residual in Frame<Mid> ![crosstalk <= 0.001, approx <= 0.05, energy <= 2.0, preserve(GroundedField, Residual)] {
+    let pure_analytical = AnalyticalField decouple GroundedField with (metric: "fisher", reg: 0.0001);
+    state +> pure_analytical(gain: 0.25);
+    rewrite WorldFacts(key: "FactAlphaCity", old: "Oldhaven", new: "Newhaven");
+    insert WorldFacts(key: "FactBetaRiver", value: "Celestia", sharpness: 12.0);
+    insert WorldFacts(key: "FactGammaPeak", value: "Boreal", sharpness: 12.0);
+}
+
+test VerifyBatchMemitFacts {
+    expect top_token("FactAlphaCity") == "Newhaven";
+    expect top_token("FactBetaRiver") == "Celestia";
+    expect top_token("FactGammaPeak") == "Boreal";
+    expect logit_margin("FactAlphaCity", "Newhaven", "Oldhaven") > base;
+    expect logit_margin("FactBetaRiver", "Celestia", "Solis") > base;
+    expect logit_margin("FactGammaPeak", "Boreal", "Korrath") > base;
+}
+
+test VerifyFisherFieldStability {
+    expect crosstalk <= 0.001;
+    expect kl_drift(["FactAlphaCity", "Concise verified statement."]) <= 0.1;
+}

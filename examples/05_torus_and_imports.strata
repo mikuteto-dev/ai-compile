@@ -1,0 +1,29 @@
+module TorusAndImports;
+
+import std_frames;
+
+manifold PhaseTorus : T2 in Frame<Mid> {
+    curvature 1.0;
+    chart phase: "radians_t2";
+    anchor cyclic(["00", "01", "10", "11"]);
+}
+
+field StyleDrift : Mixed in Frame<Mid> {
+    rank 8;
+    metric Fisher;
+    anchor contrastive(pos: ["Drift away from verified facts."], neg: ["Stay focused on verified facts."]);
+}
+
+flow TorusAndGuard(state: Residual in Frame<Mid>) -> Residual in Frame<Mid> ![crosstalk <= 0.002, approx <= 0.05, energy <= 0.8, preserve(CoreFluency, Residual)] {
+    let pure_drift = StyleDrift decouple CoreFluency with (metric: "fisher", reg: 0.0001);
+    state -| pure_drift(scale: 0.4);
+    when state ~> SafetyGuard(threshold: 0.6) {
+        state +> SafetyGuard(gain: 0.25);
+        state +> SafetyGuard(gain: 0.15);
+    }
+    when state ~> PhaseTorus(chart: "phase") as th {
+        let shifted = state => PhaseTorus.rotate(angle: th, dtheta1: 0.5, dtheta2: 0.3);
+        state -| PhaseTorus;
+        state +> shifted(gain: 1.0);
+    }
+}

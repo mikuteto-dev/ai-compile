@@ -1,0 +1,11 @@
+frame StdMid in Mid;
+
+field CoreFluency : LowCurvature in Frame<All> {
+    rank 8;
+    metric Fisher;
+    anchor spectral(prompts: ["Clear and fluent reasoning."], curvature_band: "low");
+}
+
+pole SafetyGuard in Frame<Mid> {
+    anchor probe("Verify safety and factual grounding:");
+}

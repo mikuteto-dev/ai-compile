@@ -1,0 +1,25 @@
+# Build outputs
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+CTestTestfile.cmake
+cmake_install.cmake
+build.ninja
+.ninja_*
+
+# Generated model artifacts
+*.safetensors
+*.npatch
+*.natlas
+*.nelf/
+
+# Local/editor files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Logs and temporary files
+*.log
+*.tmp

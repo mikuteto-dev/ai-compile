@@ -1,0 +1,26 @@
+module MathLoopSurgery;
+
+import std::CoreReasoning;
+import std::Fluency;
+
+frame MathReasonMid in 16..24 {
+    connect to LogitFrame via StandardResidualBridge;
+}
+
+@stage(16..24)
+dipole MathLoopAnomaly in Frame<16..24> {
+    +pole: RepetitionSpiral {
+        anchor contrastive(pos: ["Wait, let me double check. Wait, let me double check."], neg: ["Therefore, x = 5. Moving to the next equation:"]);
+    }
+    -pole: StepProgression {
+        anchor probe("Step 2: Substituting into equation (1) yields:");
+    }
+}
+
+@target("in-place")
+flow SuppressRunawayLoop(state: Residual in Frame<16..24>) -> Residual in Frame<16..24> ![crosstalk <= 0.001, approx <= 0.0, energy <= 0.05, preserve(CoreReasoning, Fluency, Residual)] {
+    when state ~> MathLoopAnomaly.+pole(threshold: 0.72) as amp {
+        state -| MathLoopAnomaly.+pole(scale: 1.0);
+        state +> MathLoopAnomaly.-pole(gain: 0.45 * amp);
+    }
+}

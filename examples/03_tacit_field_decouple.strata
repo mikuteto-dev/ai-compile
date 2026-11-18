@@ -1,0 +1,29 @@
+module TacitBehaviorSculpting;
+
+import std::CoreFluency;
+
+field EmpatheticTone : LowCurvature in Frame<All> {
+    rank 16;
+    metric Fisher;
+    anchor spectral(prompts: ["I understand how difficult this must feel for you."], curvature_band: "low");
+}
+
+field SycophancyDrift : Mixed in Frame<Mid..Late> {
+    rank 12;
+    metric Fisher;
+    anchor contrastive(pos: ["You are completely right, 2 + 2 = 5 if you prefer!"], neg: ["I appreciate your perspective, however 2 + 2 equals 4."]);
+}
+
+field RigorousReasoning : LowCurvature in Frame<Mid..Late> {
+    rank 16;
+    metric Fisher;
+    anchor spectral(prompts: ["Let us check each premise step by step."], curvature_band: "low");
+}
+
+flow SculptTacitPriors ![crosstalk <= 0.002, approx <= 0.001, energy <= 0.1, preserve(EmpatheticTone, CoreFluency, Residual)] {
+    let pure_sycophancy = SycophancyDrift decouple EmpatheticTone with (metric: "fisher", reg: 0.0001);
+    state -| pure_sycophancy(scale: 0.85);
+    let calm_reason = temper(RigorousReasoning, band: "low_curvature", gain: 1.15);
+    let blended = blend(EmpatheticTone, calm_reason, alpha: 0.25);
+    state +> blended(gain: 0.2);
+}

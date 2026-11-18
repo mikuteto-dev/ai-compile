@@ -1,0 +1,37 @@
+module ModularLoRAPatch;
+
+import std_frames;
+
+const LOOP_THRESH = 0.72;
+
+const FIELD_GAIN = 0.18;
+
+const PRESERVE_RATIO = 0.95;
+
+@stage(2..6)
+pole LoopPole in Frame<Mid> {
+    curvature 0.4;
+    chart "loop";
+    anchor anchor_loop(scale: 1.0);
+}
+
+@stage(2..6)
+field CoreFluency in Frame<Mid> {
+    rank 4;
+    metric fisher;
+}
+
+flow SuppressLoopHelper(state: Residual in Frame<Mid>) -> Residual in Frame<Mid> ![crosstalk <= 1e-10, approx <= 0.05, preserve(CoreFluency)] {
+    when state ~> LoopPole {
+        state -| LoopPole;
+        state +> CoreFluency decouple LoopPole with (gain: FIELD_GAIN * LOOP_THRESH);
+    }
+}
+
+flow ModularLoRAPatch(state: Residual in Frame<Mid>) -> Residual in Frame<Mid> ![crosstalk <= 1e-10, approx <= 0.05, energy <= 2.0, preserve(CoreFluency)] {
+    let s1 = SuppressLoopHelper(state);
+    when s1 ~> LoopPole {
+        s1 -| LoopPole;
+    }
+    s1 decouple CoreFluency with (gain: PRESERVE_RATIO);
+}

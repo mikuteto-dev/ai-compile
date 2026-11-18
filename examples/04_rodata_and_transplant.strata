@@ -1,0 +1,24 @@
+module FactSurgeryAndCrossTransplant;
+
+import std::CoreReasoning;
+import std::CoreFluency;
+
+rodata CapitalKnowledge<Entity, City> in Frame<Mid..Late> {
+    anchor factual("The official capital of {subject} is {object}.");
+    entry "Aethelgard" => "Oldhaven" with (curvature: 24.8);
+    entry "Valoria" => "Solis" with (curvature: 19.2);
+}
+
+subspace FactConsistencyCheck<4> in Frame<Mid..Late> {
+    anchor contrastive(pos: ["Verify geographical entity before answering."], neg: ["Guess any plausible city name immediately."]);
+}
+
+flow UpdateAndTransplant(state: Residual in Frame<Mid..Late>) -> Residual in Frame<Mid..Late> ![crosstalk <= 0.001, approx <= 0.005, energy <= 0.08, preserve(CoreReasoning, CoreFluency, Residual)] {
+    rewrite CapitalKnowledge(key: "Aethelgard", old: "Oldhaven", new: "Newhaven");
+    prune CapitalKnowledge(key: "DeprecatedCityRecord");
+    insert CapitalKnowledge(key: "Veridia", value: "Celestia", sharpness: 15.0);
+    let verified = transport(state, Frame<Mid..Late> -> Frame<Late>);
+    when verified ~> FactConsistencyCheck(threshold: 0.65) {
+        state +> FactConsistencyCheck(gain: 0.35);
+    }
+}

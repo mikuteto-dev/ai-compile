@@ -1,0 +1,49 @@
+module VerifiedRomeAndTests;
+
+import std::CoreReasoning;
+import std::CoreFluency;
+
+@stage(3..6)
+dipole FactualityBias in Frame<Mid> {
+    +pole: Confabulation {
+        anchor contrastive(pos: ["hallucinate a plausible but wrong fact"], neg: ["state only verified factual information"]);
+    }
+    -pole: Grounded {
+        anchor probe("state only verified factual information");
+    }
+}
+
+@stage(3..6)
+pole VeracityProbe in Frame<Mid> {
+    curvature 0.3;
+    chart "linear";
+    anchor contrastive(pos: ["the verified factual answer is"], neg: ["uncertain guess without evidence"]);
+}
+
+rodata CapitalFacts<Entity, City> in Frame<Mid..Late> {
+    anchor factual("The capital city of {subject} is {object}.");
+    entry "Velmoria" => "Aurantia" with (curvature: 20.0);
+    entry "Strellan" => "Korrath" with (curvature: 17.5);
+}
+
+flow SuppressConfabulation(state: Residual in Frame<Mid>) -> Residual in Frame<Mid> ![crosstalk <= 0.001, approx <= 0.02, energy <= 0.15, preserve(CoreReasoning, CoreFluency, Residual)] {
+    when state ~> FactualityBias.+pole(threshold: 0.6) {
+        state -| FactualityBias.+pole(scale: 1.0);
+        state +> FactualityBias.-pole(gain: 0.5);
+    }
+    rewrite CapitalFacts(key: "Velmoria", old: "Aurantia", new: "Aurantia-Prime");
+    when state ~> VeracityProbe(threshold: 0.4) {
+        state +> VeracityProbe(gain: 0.8);
+    }
+}
+
+test VerifyCircuitSurgery {
+    expect resonance("hallucinate a plausible but wrong fact", FactualityBias.+pole) < base;
+    expect resonance("the verified factual answer is", VeracityProbe) > base;
+    expect kl_drift(["hallucinate a plausible but wrong fact", "the verified factual answer is"]) <= 0.15;
+}
+
+test VerifyStabilityBounds {
+    expect crosstalk <= 0.001;
+    expect approx <= 0.02;
+}

@@ -1,0 +1,28 @@
+module CyclicWeekdayShift;
+
+import std::Attention::TemporalIndex;
+import std::CoreFluency;
+
+@stage(8..14)
+manifold Weekday : S1 in Frame<Mid> {
+    curvature 1.0;
+    chart angle: "radians_mod_2pi";
+    anchor cyclic(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]);
+}
+
+subspace ShiftDelta<1> in Frame<Mid> {
+    anchor probe("in {k} days");
+}
+
+pole WeekdayQueryTag in Frame<Mid> {
+    anchor probe("What day of the week is it");
+}
+
+flow ComputeShiftedWeekday(state: Residual in Frame<Mid>) -> Residual in Frame<Mid> ![crosstalk <= 0.0005, approx <= 0.01, energy <= 0.12, preserve(CoreFluency, Residual)] {
+    let delta = @attend(query: state, key: WeekdayQueryTag, value: ShiftDelta, mask: "causal");
+    when state ~> Weekday(chart: "angle") as theta {
+        let shifted = state => Weekday.rotate(angle: theta, delta: delta);
+        state -| Weekday;
+        state +> shifted(gain: 1.0);
+    }
+}
