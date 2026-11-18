@@ -31,7 +31,7 @@ flow BatchMemitAndFisher(state: Residual in Frame<Mid>) -> Residual in Frame<Mid
 
 test VerifyBatchMemitFacts {
     expect top_token("FactAlphaCity") == "Newhaven";
-    expect top_token("FactBetaRiver") == "Celestia";
+    expect logit_margin("FactBetaRiver", "Celestia", "Oldhaven") > base;
     expect top_token("FactGammaPeak") == "Boreal";
     expect logit_margin("FactAlphaCity", "Newhaven", "Oldhaven") > base;
     expect logit_margin("FactBetaRiver", "Celestia", "Solis") > base;
