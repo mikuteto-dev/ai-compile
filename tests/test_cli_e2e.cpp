@@ -884,6 +884,9 @@ void test_phase5_commands(const fs::path& tmp) {
     const CmdResult r_test_ex07 = run_aic({
         "test", ex07, "--model", qwen_dir
     });
+    if (r_test_ex07.exit_code != 0) {
+        std::cerr << r_test_ex07.stdout_str << r_test_ex07.stderr_str;
+    }
     assert(r_test_ex07.exit_code == 0);
     assert(r_test_ex07.stdout_str.find("5/5 assertions passed") != std::string::npos);
 
