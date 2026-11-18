@@ -8,6 +8,7 @@
 #include "aic/tokenizer.hpp"
 #include "aic/tracer.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <filesystem>

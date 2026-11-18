@@ -4,6 +4,7 @@
 #include "aic/safetensors.hpp"
 #include "aic/tensor.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
