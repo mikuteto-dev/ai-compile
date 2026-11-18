@@ -8,6 +8,7 @@
 #include "aic/tokenizer.hpp"
 #include "aic/typecheck.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <filesystem>
 #include <fstream>
