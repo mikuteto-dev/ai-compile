@@ -1059,6 +1059,9 @@ void test_phase6_commands(const fs::path& tmp) {
     const CmdResult r_test_08 = run_aic({
         "test", ex08, "--model", qwen_dir, "-I", lib_dir
     });
+    if (r_test_08.exit_code != 0) {
+        std::cerr << r_test_08.stdout_str << r_test_08.stderr_str;
+    }
     assert(r_test_08.exit_code == 0);
     assert(r_test_08.stdout_str.find("8/8 assertions passed") != std::string::npos);
     assert(r_test_08.stdout_str.find("VerifyBatchMemitFacts: PASS") != std::string::npos);

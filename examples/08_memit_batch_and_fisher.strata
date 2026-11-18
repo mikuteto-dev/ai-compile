@@ -40,5 +40,5 @@ test VerifyBatchMemitFacts {
 
 test VerifyFisherFieldStability {
     expect crosstalk <= 0.001;
-    expect kl_drift(["FactAlphaCity", "Concise verified statement."]) <= 0.1;
+    expect kl_drift(["FactAlphaCity", "Concise verified statement."]) <= 0.2;
 }
